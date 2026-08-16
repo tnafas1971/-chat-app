@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چت‌روم مدرن</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/font- வசির/v34/font- வசির.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="chat-container">
+        <header>
+            <div class="user-info">
+                <span id="current-user-display"></span>
+            </div>
+            <div class="online-users">
+                <span>👥 کاربران آنلاین (<span id="online-count">0</span> نفر): </span>
+                <ul id="online-users-list"></ul>
+            </div>
+        </header>
+        <main id="messages-list"></main>
+        <div id="reply-container" class="reply-container hidden">
+            <span>پاسخ به: <strong id="replying-to-user"></strong></span>
+            <button id="cancel-reply">✖</button>
+        </div>
+        <footer>
+            <form id="chat-form">
+                <input type="text" id="msg-input" placeholder="پیام خود را بنویسید...">
+                <button type="submit">ارسال</button>
+            </form>
+        </footer>
+    </div>
+
+    <div id="login-overlay" class="overlay">
+        <div class="login-box">
+            <h2>نام کاربری خود را وارد کنید</h2>
+            <input type="text" id="username-input" placeholder="نام کاربری">
+            <button id="login-btn">ورود به چت</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

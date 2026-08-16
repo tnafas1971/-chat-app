@@ -1,0 +1,295 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden { display: none !important; }
+
+/* ═══════════ صفحه ورود ═══════════ */
+.overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    width: 320px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.login-box h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.4em;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.95em;
+    transition: border-color 0.3s;
+    outline: none;
+}
+
+.login-box input:focus {
+    border-color: #667eea;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+    font-family: inherit;
+}
+
+.login-box button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+/* ═══════════ کانتینر اصلی ═══════════ */
+#chat-container {
+    width: 100%;
+    max-width: 480px;
+    height: 92vh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════ هدر ═══════════ */
+header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    font-weight: bold;
+    font-size: 1em;
+    background: rgba(255,255,255,0.15);
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+.online-users {
+    font-size: 0.85em;
+    text-align: left;
+    max-width: 55%;
+}
+
+.online-users span {
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.9);
+}
+
+#online-users-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 3px;
+}
+
+#online-users-list li {
+    display: inline;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    margin-left: 3px;
+    white-space: nowrap;
+}
+
+/* ═══════════ ناحیه پیام‌ها ═══════════ */
+main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+li {
+    list-style: none;
+    padding: 10px 14px;
+    border-radius: 15px;
+    position: relative;
+    max-width: 80%;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.my-message {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    align-self: flex-start;
+    border-bottom-right-radius: 5px;
+}
+
+.other-message {
+    background: linear-gradient(135deg, #f1f3f5 0%, #f8f9fa 100%);
+    border: 1px solid #e5e7eb;
+    align-self: flex-end;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+
+
+.system-message {
+    background: none;
+    text-align: center;
+    font-size: 0.85em;
+    color: #aaa;
+    width: 100%;
+    max-width: 100%;
+}
+
+.message-time {
+    display: block;
+    font-size: 0.7em;
+    margin-top: 5px;
+    opacity: 0.7;
+    text-align: left;
+    direction: ltr;
+}
+
+.my-message .message-time { color: rgba(255,255,255,0.8); }
+.other-message .message-time { color: #999; }
+
+/* ═══════════ ریپلای ═══════════ */
+.reply-preview {
+    background: rgba(0,0,0,0.06);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    margin-bottom: 6px;
+    border-right: 3px solid #667eea;
+}
+
+.reply-btn {
+    font-size: 0.7em;
+    background: none;
+    border: 1px solid #667eea;
+    color: #667eea;
+    border-radius: 5px;
+    padding: 2px 8px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: all 0.2s;
+}
+
+.reply-btn:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* ═══════════ فوتر و فرم ═══════════ */
+footer {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    background: white;
+}
+
+#chat-form {
+    display: flex;
+    gap: 8px;
+}
+
+#msg-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 2px solid #e8e8e8;
+    border-radius: 25px;
+    outline: none;
+    font-size: 0.95em;
+    transition: border-color 0.3s;
+    font-family: inherit;
+}
+
+#msg-input:focus {
+    border-color: #667eea;
+}
+
+#chat-form button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: transform 0.2s, opacity 0.2s;
+    font-family: inherit;
+}
+
+#chat-form button:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* ═══════════ کانتینر ریپلای ═══════════ */
+.reply-container {
+    background: #f8f9ff;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e8e8e8;
+    font-size: 0.85em;
+    color: #555;
+}
+
+#cancel-reply {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1em;
+}
+
+/* اسکرول‌بار */
+main::-webkit-scrollbar {
+    width: 5px;
+}
+main::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
