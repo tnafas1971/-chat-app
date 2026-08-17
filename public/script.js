@@ -16,7 +16,7 @@ const cancelReplyBtn = document.getElementById('cancel-reply');
 let currentUser = '';
 let replyingTo = null; // { user: '...', text: '...', id: '...' }
 
-// Login Logic
+// --- Login Logic ---
 loginBtn.addEventListener('click', () => {
     const username = usernameInput.value;
     if (!username.trim()) return alert('لطفاً نام کاربری را وارد کنید.');
@@ -40,8 +40,8 @@ usernameInput.addEventListener('keypress', (e) => {
     }
 });
 
-// Chat Logic
-socket.on('chat message', (data) => {
+// --- Core Display Function (Standardized for New & Old messages) ---
+function displayMessage(data) {
     const messageElement = document.createElement('li');
     
     if (data.system) {
@@ -50,19 +50,21 @@ socket.on('chat message', (data) => {
     } else {
         const isMyMessage = data.user === currentUser;
         messageElement.classList.add(isMyMessage ? 'my-message' : 'other-message');
-        messageElement.setAttribute('data-message-id', data.id); // For potential future use
 
         let messageContent = '';
 
         // Reply preview
         if (data.replyTo) {
+            // چک می‌کنیم اگر replyTo به صورت آبجکت بود (پیام قدیمی) یا رشته (پیام جدید)
+            const replyUser = typeof data.replyTo === 'object' ? data.replyTo.user : data.replyTo;
+            const replyText = typeof data.replyTo === 'object' ? data.replyTo.text : '';
+            
             messageContent += `<div class="reply-preview">
-                                <strong>پاسخ به ${data.replyTo.user}:</strong> ${data.replyTo.text.substring(0, 50)}${data.replyTo.text.length > 50 ? '...' : ''}
+                                <strong>پاسخ به ${replyUser}:</strong> ${replyText.substring(0, 50)}${replyText.length > 50 ? '...' : ''}
                              </div>`;
         }
         
         messageContent += `<strong>${data.user}:</strong> ${data.text}`;
-
         messageElement.innerHTML = messageContent;
 
         // Add reply button for other users' messages
@@ -70,12 +72,12 @@ socket.on('chat message', (data) => {
             const replyBtn = document.createElement('button');
             replyBtn.innerText = 'پاسخ';
             replyBtn.classList.add('reply-btn');
-            // Pass relevant data for replying
-            replyBtn.onclick = () => startReply(data.id, data.user, data.text);
+            // استفاده از id پیام برای پاسخ دادن (در سرور ما فعلاً id نداریم، پس از متن یا کاربر استفاده می‌کنیم)
+            replyBtn.onclick = () => startReply(data.user, data.user, data.text);
             messageElement.appendChild(replyBtn);
         }
 
-        // Add time if available
+        // Add time
         if (data.time) {
             const timeSpan = document.createElement('span');
             timeSpan.classList.add('message-time');
@@ -85,12 +87,27 @@ socket.on('chat message', (data) => {
     }
     
     messagesList.appendChild(messageElement);
-    messagesList.scrollTop = messagesList.scrollHeight; // Scroll to bottom
+    messagesList.scrollTop = messagesList.scrollHeight;
+}
+
+// --- Socket Listeners ---
+
+// 1. دریافت پیام‌های قدیمی از سرور
+socket.on('message history', (oldMessages) => {
+    oldMessages.forEach((msg) => {
+        displayMessage(msg);
+    });
 });
 
+// 2. دریافت پیام‌های جدید (هم سیستمی و هم چت)
+socket.on('chat message', (data) => {
+    displayMessage(data);
+});
+
+// 3. لیست کاربران
 socket.on('user list', (users) => {
     onlineCountSpan.innerText = users.length;
-    onlineUsersList.innerHTML = ''; // Clear existing list
+    onlineUsersList.innerHTML = '';
     users.forEach(user => {
         const li = document.createElement('li');
         li.innerText = user;
@@ -98,33 +115,33 @@ socket.on('user list', (users) => {
     });
 });
 
-// Send message
+// --- Chat Logic ---
+
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const text = msgInput.value;
     if (text.trim()) {
         const messageData = { text: text };
         if (replyingTo) {
-            // Include replyTo details in the message
-            messageData.replyTo = { user: replyingTo.user, text: replyingTo.text, id: replyingTo.id };
+            messageData.replyTo = { 
+                user: replyingTo.user, 
+                text: replyingTo.text 
+            };
         }
         socket.emit('chat message', messageData);
-        cancelReply(); // Clear reply state
+        cancelReply();
     }
-    msgInput.value = ''; // Clear input field
+    msgInput.value = '';
     msgInput.focus();
 });
 
-// Start reply action
-function startReply(messageId, messageUser, messageText) {
-    replyingTo = { id: messageId, user: messageUser, text: messageText };
-    // Display who the reply is for
+function startReply(id, messageUser, messageText) {
+    replyingTo = { id: id, user: messageUser, text: messageText };
     replyingToUserSpan.innerText = `${messageUser}: "${messageText.substring(0, 30)}${messageText.length > 30 ? '...' : ''}"`;
     replyContainer.classList.remove('hidden');
     msgInput.focus();
 }
 
-// Cancel reply action
 function cancelReply() {
     replyingTo = null;
     replyContainer.classList.add('hidden');
@@ -133,12 +150,11 @@ function cancelReply() {
 
 cancelReplyBtn.addEventListener('click', cancelReply);
 
-// Focus input field when clicking main chat area
 messagesList.addEventListener('click', (e) => {
     if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT' && e.target.id !== 'cancel-reply') {
         msgInput.focus();
     }
 });
 
-// Initial state: hide chat form, show login overlay
+// Initial state
 chatForm.style.display = 'none';

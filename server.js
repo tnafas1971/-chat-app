@@ -13,6 +13,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let users = [];
 
+// --- بخش جدید: ذخیره پیام‌ها در حافظه ---
+let messageHistory = []; 
+// ---------------------------------------
+
 io.on('connection', (socket) => {
     console.log('A user connected');
 
@@ -31,8 +35,13 @@ io.on('connection', (socket) => {
 
         io.emit('user list', users); // Send updated list
 
-        socket.emit('chat message', { system: true, text: `به چت‌روم خوش آمدی، ${trimmedUsername}!` });
-        socket.broadcast.emit('chat message', { system: true, text: `${trimmedUsername} وارد چت شد.` });
+        socket.emit('chat message', { system: true, text: `به گفتگو خوش آمدی، ${trimmedUsername}!` });
+        socket.broadcast.emit('chat message', { system: true, text: `${trimmedUsername} وارد گفتگو شد.` });
+
+        // --- بخش جدید: ارسال تاریخچه پیام‌ها به کاربر جدید ---
+        // فقط ۵۰ پیام آخر را می‌فرستیم
+        socket.emit('message history', messageHistory.slice(-50));
+        // --------------------------------------------------
 
         callback({ status: 'ok', username: trimmedUsername });
     });
@@ -45,6 +54,15 @@ io.on('connection', (socket) => {
             replyTo: msgData.replyTo || null,
             time: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
         };
+
+        // --- بخش جدید: ذخیره پیام در آرایه ---
+        messageHistory.push(messageToSend);
+        // اگر تعداد از ۵۰ بیشتر شد، قدیمی‌ترین را حذف کن تا حافظه پر نشود
+        if (messageHistory.length > 50) {
+            messageHistory.shift(); 
+        }
+        // ------------------------------------
+
         io.emit('chat message', messageToSend);
     });
 
@@ -54,7 +72,7 @@ io.on('connection', (socket) => {
             users = users.filter(user => user !== disconnectedUsername);
             console.log(`User ${disconnectedUsername} disconnected`);
             io.emit('user list', users); // Send updated list
-            io.emit('chat message', { system: true, text: `${disconnectedUsername} از چت خارج شد.` });
+            io.emit('chat message', { system: true, text: `${disconnectedUsername} از گفتگو خارج شد.` });
         } else {
             console.log('A guest disconnected');
         }
