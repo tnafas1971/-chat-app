@@ -1,7 +1,8 @@
 const express = require('express');
 const http = require('http');
-const path = require('path');
 const socketIo = require('socket.io');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,56 +10,57 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
-// این خط می‌گوید: همه فایل‌ها را در پوشه public پیدا کن
-app.use(express.static(path.join(__dirname, 'public')));
-
-// این خط می‌گوید: اگر کسی آدرس اصلی را زد، فایل index.html را از پوشه public بده به او
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// --- بخش عیب‌یابی (برای اینکه بفهمیم مشکل کجاست) ---
+app.get('/debug', (req, res) => {
+    const files = fs.readdirSync(__dirname);
+    res.send(`
+        <h3>Debug Info:</h3>
+        <p><strong>Current Directory:</strong> ${__dirname}</p>
+        <p><strong>Files found in Root:</strong> ${JSON.stringify(files)}</p>
+        <hr>
+        <p>Try visiting <a href="/">Home Page</a></p>
+    `);
 });
 
-let users = [];
+// تنظیم پوشه استاتیک (ابتدا پوشه public و سپس پوشه اصلی)
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
+
+// مسیر اصلی: تلاش برای پیدا کردن index.html در هر دو مکان
+app.get('/', (req, res) => {
+    const publicPath = path.join(__dirname, 'public', 'index.html');
+    const rootPath = path.join(__dirname, 'index.html');
+
+    if (fs.existsSync(publicPath)) {
+        res.sendFile(publicPath);
+    } else if (fs.existsSync(rootPath)) {
+        res.sendFile(rootPath);
+    } else {
+        res.status(404).send('<h1>404 - File Not Found</h1><p>index.html not found in root or public folder.</p>');
+    }
+});
+
+// --- منطق Socket.io ---
+let onlineUsers = 0;
 
 io.on('connection', (socket) => {
+    onlineUsers++;
+    io.emit('userCount', onlineUsers);
     console.log('A user connected');
 
-    socket.on('set username', (username, callback) => {
-        const trimmedUsername = username.trim();
-        if (!trimmedUsername) {
-            return callback({ status: 'error', message: 'نام کاربری نمی‌تواند خالی باشد.' });
-        }
-        if (users.includes(trimmedUsername)) {
-            return callback({ status: 'error', message: 'این نام کاربری قبلاً گرفته شده است.' });
-        }
-        socket.username = trimmedUsername;
-        users.push(trimmedUsername);
-        io.emit('user list', users);
-        socket.emit('chat message', { system: true, text: `به چت‌روم خوش آمدی، ${trimmedUsername}!` });
-        socket.broadcast.emit('chat message', { system: true, text: `${trimmedUsername} وارد چت شد.` });
-        callback({ status: 'ok', username: trimmedUsername });
-    });
-
-    socket.on('chat message', (msgData) => {
-        const senderUsername = socket.username || 'کاربر ناشناس';
-        const messageToSend = {
-            user: senderUsername,
-            text: msgData.text,
-            replyTo: msgData.replyTo || null,
-            time: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })
-        };
-        io.emit('chat message', messageToSend);
+    socket.on('message', (data) => {
+        // data: { user: 'Name', text: 'Hello', replyTo: 'Name' }
+        io.emit('message', data);
     });
 
     socket.on('disconnect', () => {
-        const disconnectedUsername = socket.username;
-        if (disconnectedUsername) {
-            users = users.filter((user) => user !== disconnectedUsername);
-            io.emit('user list', users);
-            io.emit('chat message', { system: true, text: `${disconnectedUsername} از چت خارج شد.` });
-        }
+        onlineUsers--;
+        io.emit('userCount', onlineUsers);
+        console.log('User disconnected');
     });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`Directory: ${__dirname}`);
 });
