@@ -134,7 +134,7 @@ main {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
-    background: #cbd5e1;
+    background: #f5f7fb;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -163,14 +163,12 @@ li {
 }
 
 .other-message {
-    background: linear-gradient(135deg, #f1f3f5 0%, #f8f9fa 100%);
-    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
     align-self: flex-end;
     border-bottom-left-radius: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-
-
 
 .system-message {
     background: none;

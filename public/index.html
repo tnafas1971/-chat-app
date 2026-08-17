@@ -3,55 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Chatroom</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <style>
-        body { font-family: sans-serif; background: #121212; color: white; display: flex; flex-direction: column; height: 100vh; margin: 0; }
-        #chat-container { flex: 1; overflow-y: auto; padding: 20px; }
-        #input-area { padding: 20px; background: #1e1e1e; display: flex; gap: 10px; }
-        input { flex: 1; padding: 10px; border-radius: 5px; border: none; }
-        button { padding: 10px 20px; cursor: pointer; background: #03dac6; border: none; border-radius: 5px; font-weight: bold; }
-        .msg { margin-bottom: 15px; padding: 10px; border-radius: 8px; background: #333; max-width: 80%; }
-        .msg b { color: #03dac6; display: block; margin-bottom: 5px; }
-        .user-count { font-size: 0.8rem; color: #aaa; padding: 10px; }
-    </style>
+    <title>چت‌روم مدرن</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/font- வசির/v34/font- வசির.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div class="user-count">Online Users: <span id="count">0</span></div>
-    <div id="chat-container"></div>
-    <div id="input-area">
-        <input type="text" id="username" placeholder="نام شما..." style="flex: 0 0 100px;">
-        <input type="text" id="message" placeholder="پیام خود را بنویسید...">
-        <button onclick="sendMessage()">ارسال</button>
+    <div id="chat-container">
+        <header>
+            <div class="user-info">
+                <span id="current-user-display"></span>
+            </div>
+            <div class="online-users">
+                <span>👥 کاربران آنلاین (<span id="online-count">0</span> نفر): </span>
+                <ul id="online-users-list"></ul>
+            </div>
+        </header>
+        <main id="messages-list"></main>
+        <div id="reply-container" class="reply-container hidden">
+            <span>پاسخ به: <strong id="replying-to-user"></strong></span>
+            <button id="cancel-reply">✖</button>
+        </div>
+        <footer>
+            <form id="chat-form">
+                <input type="text" id="msg-input" placeholder="پیام خود را بنویسید...">
+                <button type="submit">ارسال</button>
+            </form>
+        </footer>
     </div>
 
-    <script>
-        const socket = io();
-        const chatContainer = document.getElementById('chat-container');
-        const msgInput = document.getElementById('message');
-        const userInput = document.getElementById('username');
-        const countSpan = document.getElementById('count');
+    <div id="login-overlay" class="overlay">
+        <div class="login-box">
+            <h2>نام کاربری خود را وارد کنید</h2>
+            <input type="text" id="username-input" placeholder="نام کاربری">
+            <button id="login-btn">ورود به چت</button>
+        </div>
+    </div>
 
-        socket.on('userCount', (count) => { countSpan.innerText = count; });
-
-        socket.on('message', (data) => {
-            const div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `<b>${data.user}</b> ${data.text}`;
-            chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        });
-
-        function sendMessage() {
-            const user = userInput.value || 'Guest';
-            const text = msgInput.value;
-            if (text) {
-                socket.emit('message', { user, text });
-                msgInput.value = '';
-            }
-        }
-
-        msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
