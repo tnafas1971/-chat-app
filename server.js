@@ -1,36 +1,25 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const socketIo = require('socket.io');
+const io = require('socket.io')(http);
 const path = require('path');
 
-// تنظیم فایل‌های استاتیک (HTML, CSS, JS) از داخل پوشه public
-const publicPath = path.join(__dirname, 'public');
-app.use(express.static(publicPath));
+// تنظیم پورت: Railway به صورت داینامیک پورت را تعیین می‌کند
+const PORT = process.env.PORT || 8080;
 
-// مسیر اصلی برای ارسال فایل index.html که در پوشه public قرار دارد
+// مسیر فایل‌های استاتیک (CSS, JS, index.html)
+app.use(express.static(path.join(__dirname, 'public')));
+
 app.get('/', (req, res) => {
-    res.sendFile(path.join(publicPath, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// تنظیم Socket.io روی همان سروری که express اجرا می‌شود
-const io = socketIo(http);
-
+// سوکت‌ها
 io.on('connection', (socket) => {
-    console.log('A user connected');
-
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
+    console.log('a user connected');
 });
 
-// استفاده از پورت سیستم یا پورت ۳۰۰۰ در حالت لوکال
-const PORT = process.env.PORT || 3000;
+// گوش دادن روی پورت صحیح
 http.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-    console.log(`Serving static files from: ${publicPath}`);
 });
