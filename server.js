@@ -8,6 +8,18 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
+const fs = require('fs');
+const publicPath = path.join(__dirname, 'public');
+
+console.log("Checking directory:", publicPath);
+if (fs.existsSync(publicPath)) {
+    console.log("SUCCESS: Public directory exists.");
+    const files = fs.readdirSync(publicPath);
+    console.log("Files in public:", files);
+} else {
+    console.log("ERROR: Public directory NOT found!");
+}
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
