@@ -9,29 +9,13 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
-// --- بخش رفع مشکل Not Found ---
-// اول پوشه public را چک می‌کند، اگر نبود پوشه اصلی را چک می‌کند
+// این خط می‌گوید: همه فایل‌ها را در پوشه public پیدا کن
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(__dirname));
 
-// تعریف مسیر اصلی به صورت اجباری
+// این خط می‌گوید: اگر کسی آدرس اصلی را زد، فایل index.html را از پوشه public بده به او
 app.get('/', (req, res) => {
-    // اول سعی می‌کند index.html را از پوشه public باز کند
-    const publicIndex = path.join(__dirname, 'public', 'index.html');
-    // اگر نبود، از پوشه اصلی باز می‌کند
-    const rootIndex = path.join(__dirname, 'index.html');
-
-    // بررسی وجود فایل‌ها برای جلوگیری از خطای Not Found
-    const fs = require('fs');
-    if (fs.existsSync(publicIndex)) {
-        res.sendFile(publicIndex);
-    } else if (fs.existsSync(rootIndex)) {
-        res.sendFile(rootIndex);
-    } else {
-        res.status(404).send('خطا: فایل index.html پیدا نشد! لطفاً ساختار فایل‌های خود را بررسی کنید.');
-    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-// -------------------------------
 
 let users = [];
 
