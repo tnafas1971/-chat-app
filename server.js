@@ -9,7 +9,14 @@ const io = socketIo(server);
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, 'public')));
+// اگر فایل‌هایت در پوشه public نیستند، این خط را به پوشه اصلی تغییر می‌دهیم
+// اگر فایل‌ها داخل پوشه public هستند، این خط را دست نزن
+app.use(express.static(__dirname)); 
+
+// این بخش را اضافه کردیم تا مطمئن شویم وقتی کاربر آدرس اصلی را می‌زند، index.html باز می‌شود
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 let users = [];
 
@@ -92,10 +99,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// اجرای سرور؛ این قسمت باید در انتهای فایل باشد
+// اجرای سرور
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
- 
-
